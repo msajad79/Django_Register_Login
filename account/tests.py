@@ -15,10 +15,10 @@ class RegisterTest(TestCase):
             'password1': 'th1s 1s s00000 hard pa55word',
             'password2': 'th1s 1s s00000 hard pa55word'
         }
-        res = self.client.post('/account/register/', data=data)
+        res_register = self.client.post('/account/register/', data=data)
         
-        self.assertEqual(res.status_code, 302)
-        self.assertEqual(res.url, '/account/register/activate/')
+        self.assertEqual(res_register.status_code, 302)
+        self.assertEqual(res_register.url, '/account/register/activate/')
 
         self.assertTrue(User.objects.filter(username='user1').exists())
         user1 = User.objects.get(username='user1')
@@ -35,6 +35,9 @@ class RegisterTest(TestCase):
         res_activate = self.client.get(link_activate)
 
         self.assertEqual(res_activate.status_code, 200)
-        
+
         self.assertTrue(User.objects.get(username='user1').is_active)
+
+        res_login = self.client.login(username=data['username'], password=data['password1'])
+        self.assertTrue(res_login)
 

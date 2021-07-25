@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views import View
+from django.contrib.auth import login
 from django.contrib.auth.models import User
 
 from .forms import RegisterForm
@@ -52,6 +53,7 @@ class ActivateAccountView(View):
         if not user is None and account_activation_token.check_token(user,token):
             user.is_active = True
             user.save()
+            #login(request, user)
             return render(request, 'register/confirm_mail_done.html')
         return render(request, 'register/confirm_mail_invalid.html')
 

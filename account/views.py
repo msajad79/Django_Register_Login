@@ -4,12 +4,16 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views import View
-from django.contrib.auth import login
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 
-from .forms import RegisterForm
+from .forms import RegisterForm, LoginForm
 from .tokens import account_activation_token
 
+
+class ProfileView(View):
+    def get(self, request):
+        return render(request, 'profile/profile.html')
 
 class RegisterView(View):
 
@@ -56,6 +60,29 @@ class ActivateAccountView(View):
             #login(request, user)
             return render(request, 'register/confirm_mail_done.html')
         return render(request, 'register/confirm_mail_invalid.html')
+
+
+class LoginView(View):
+    def get(self, request):
+        form = LoginForm()
+        return render(request, 'login/login.html', context={'form':form})
+
+    def post(self, request):
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('profile')
+            else:
+                form = LoginForm()
+                error = ["Password or username is invalid"]
+                return render(request, 'login/login.html', context={'form':form, 'error':error})
+        else:
+            form = LoginForm()
+            return render(request, 'login/login.html', context={'form':form})
 
 
 def activate_account_send_view(request):

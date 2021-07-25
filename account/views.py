@@ -26,7 +26,7 @@ class RegisterView(View):
             curent_site = get_current_site(request)
             subject = 'Active your account'
             message = render_to_string(
-                'register/message_send_mail.txt',
+                'register/message_send_mail.html',
                 {
                     'user': user,
                     'domain': curent_site.domain,

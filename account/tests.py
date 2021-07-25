@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.core import mail
 from django.contrib.auth.models import User
+from bs4 import BeautifulSoup
 
 class RegisterTest(TestCase):
     def setUp(self) -> None:
@@ -15,8 +16,25 @@ class RegisterTest(TestCase):
             'password2': 'th1s 1s s00000 hard pa55word'
         }
         res = self.client.post('/account/register/', data=data)
+        
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, '/account/register/activate/')
+
+        self.assertTrue(User.objects.filter(username='user1').exists())
         user1 = User.objects.get(username='user1')
-        print(res)
-        print(user1)
-        print(user1.profile.bio)
-        print(mail.outbox[0].body)
+        self.assertFalse(user1.is_active)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(mail.outbox[0], 'Active your account')
+        body = mail.outbox[0].body
+        soup = BeautifulSoup(body, 'html.parser')
+        link_activate = soup.find('a', id='activate_link')
+        self.assertNotEqual(link_activate, None)
+        link_activate = link_activate['href']
+
+        res_activate = self.client.get(link_activate)
+
+        self.assertEqual(res_activate.status_code, 200)
+        
+        self.assertTrue(User.objects.get(username='user1').is_active)
+

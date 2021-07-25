@@ -15,10 +15,10 @@ class RegisterTest(TestCase):
             'password1': 'th1s 1s s00000 hard pa55word',
             'password2': 'th1s 1s s00000 hard pa55word'
         }
-        res_register = self.client.post('/account/register/', data=data)
+        res_register = self.client.post('/accounts/register/', data=data)
         
         self.assertEqual(res_register.status_code, 302)
-        self.assertEqual(res_register.url, '/account/register/activate/')
+        self.assertEqual(res_register.url, '/accounts/register/activate/')
 
         self.assertTrue(User.objects.filter(username='user1').exists())
         user1 = User.objects.get(username='user1')
